@@ -12,6 +12,7 @@ class Garage(SQLModel, table=True):
     capacity: int = Field(index=True, default=0)
 
     start_date: date | None
-    end_date:date | None
+    end_date: date | None
 
     cars: list["Car"] = Relationship(back_populates="garages", link_model=CarGarageLink) # type: ignore
+    maintenances: list["Maintenance"] = Relationship(back_populates="garages") # type: ignore

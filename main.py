@@ -5,8 +5,10 @@ from pydantic import ValidationError
 from sqlmodel import Session
 from .garage import repo as garage_repo
 from .car import repo as car_repo
+from .maintenance import repo as maintanence_repo
 from .schemas.GarageSchema import CreateGarage, UpdateGarage
 from .schemas.CarSchema import CreateCar, UpdateCar, Car
+from .schemas.MaintenanceSchema import CreateMaintenance, UpdateMaintenance, Maintenance
 from .db.db_connection import get_session
 
 from .db.db_connection import create_db_and_tables
@@ -61,9 +63,7 @@ async def root(id, db_session: session):
 
 @app.get("/cars")
 async def cars(db_session: session):
-
     garage_repo.seed(db_session)
-
     cars = []
 
     for car in car_repo.get_cars(db_session):
@@ -82,3 +82,29 @@ async def update_car(id, data: Annotated[UpdateCar, Body()], db_session: session
 @app.delete("/cars/{id}")
 async def delete_car(id, db_session: session):
     car_repo.delete_car(id, db_session)
+
+
+## MAINTENANCE
+
+@app.get("/maintenance")
+async def maintenance(db_session: session):
+    garage_repo.seed(db_session)
+    car_repo.seed(db_session)
+    maintenances = []
+
+    for maintenance in maintanence_repo.get_maintenances(db_session):
+       maintenances.append(Maintenance.model_validate(maintenance))
+
+    return maintenances
+
+@app.post("/maintenance")
+async def create_maintenance(data: Annotated[CreateMaintenance, Body()], db_session: session):
+    maintanence_repo.create_maintenance(data, db_session)
+
+@app.put("/maintenance/{id}")
+async def update_car(id, data: Annotated[UpdateMaintenance, Body()], db_session: session):
+    maintanence_repo.update_maintenance(id, data, db_session)
+
+@app.delete("/maintenance/{id}")
+async def delete_car(id, db_session: session):
+    maintanence_repo.delete_maintenance(id, db_session)

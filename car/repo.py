@@ -63,3 +63,8 @@ def delete_car(id: int, session: Annotated[Session, Depends(get_session)]):
 
     session.commit()
 
+def seed(session: Annotated[Session, Depends(get_session)]):
+    add_Car = CarModel(make="test", model="test", licensePlate="test", productionYear=325)
+    session.add(add_Car)
+    session.commit()
+    

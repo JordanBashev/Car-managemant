@@ -11,3 +11,4 @@ class Car(SQLModel, table=True):
     licensePlate: str = Field(index=True)
 
     garages: list["Garage"] = Relationship(back_populates="cars", link_model=CarGarageLink) # type: ignore
+    maintenances: list["Maintenance"] = Relationship(back_populates="cars") # type: ignore

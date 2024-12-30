@@ -1,6 +1,5 @@
 from typing import Annotated
 from fastapi import Depends
-from pydantic import TypeAdapter
 from sqlalchemy import delete, update
 from sqlmodel import Session, select
 
@@ -29,3 +28,8 @@ def delete_garage(id: int, session: Annotated[Session, Depends(get_session)]):
     session.exec(stmt)
     session.commit()
 
+def seed(session: Annotated[Session, Depends(get_session)]):
+    add_garage = GarageModel(name="test", location="test", city="test", capacity=2)
+    session.add(add_garage)
+    session.commit()
+    

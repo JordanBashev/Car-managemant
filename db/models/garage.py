@@ -1,5 +1,7 @@
 from datetime import date
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
+
+from .car_to_garage import CarGarageLink
 
 
 class Garage(SQLModel, table=True):
@@ -11,3 +13,5 @@ class Garage(SQLModel, table=True):
 
     start_date: date | None
     end_date:date | None
+
+    cars: list["Car"] = Relationship(back_populates="garages", link_model=CarGarageLink) # type: ignore

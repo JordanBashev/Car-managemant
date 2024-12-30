@@ -1,9 +1,12 @@
 from typing import Annotated
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Body, Depends, FastAPI, Form
+from pydantic import ValidationError
 from sqlmodel import Session
 from .garage import repo as garage_repo
+from .car import repo as car_repo
 from .schemas.GarageSchema import CreateGarage, UpdateGarage
+from .schemas.CarSchema import CreateCar, UpdateCar, Car
 from .db.db_connection import get_session
 
 from .db.db_connection import create_db_and_tables
@@ -53,3 +56,29 @@ async def root(id, db_session: session):
 # @app.get("/garages")
 # async def root():
 #     print("data")
+
+## CARS
+
+@app.get("/cars")
+async def cars(db_session: session):
+
+    garage_repo.seed(db_session)
+
+    cars = []
+
+    for car in car_repo.get_cars(db_session):
+       cars.append(Car.model_validate(car))
+
+    return cars
+
+@app.post("/cars")
+async def create_car(data: Annotated[CreateCar, Body()], db_session: session):
+    car_repo.create_car(data, db_session)
+
+@app.put("/cars/{id}")
+async def update_car(id, data: Annotated[UpdateCar, Body()], db_session: session):
+    car_repo.update_car(id, data, db_session)
+
+@app.delete("/cars/{id}")
+async def delete_car(id, db_session: session):
+    car_repo.delete_car(id, db_session)

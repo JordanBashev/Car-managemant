@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Annotated
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import Body, Depends, FastAPI, Form, Path
@@ -65,7 +66,6 @@ async def root(id, db_session: session):
 
 @app.get("/cars")
 async def cars(db_session: session, carMake: str | None = None, fromYear: int | None = None, toYear: int | None = None, garageId: int | None = None):
-    garage_repo.seed(db_session)
     cars = []
 
     if carMake:
@@ -105,13 +105,27 @@ async def delete_car(id, db_session: session):
 ## MAINTENANCE
 
 @app.get("/maintenance")
-async def maintenance(db_session: session):
-    garage_repo.seed(db_session)
-    car_repo.seed(db_session)
+async def maintenance(db_session: session, carId: int | None = None, startDate: date | None = None, endDate: date | None = None, garageId: int | None = None):
     maintenances = []
 
-    for maintenance in maintanence_repo.get_maintenances(db_session):
-       maintenances.append(Maintenance.model_validate(maintenance))
+    if carId:
+        for maintenance in maintanence_repo.get_maintenances_by_car(carId, db_session):
+            maintenances.append(Maintenance.model_validate(maintenance))
+        return maintenances
+    
+    if startDate and endDate:
+        for maintenance in maintanence_repo.get_maintenances_by_date(startDate, endDate, db_session):
+            maintenances.append(Maintenance.model_validate(maintenance))
+        return maintenances
+    
+    if garageId:
+        for maintenance in maintanence_repo.get_maintenances_by_garage(garageId, db_session):
+            maintenances.append(Maintenance.model_validate(maintenance))
+        return maintenances
+    
+    if carId is None and startDate is None and endDate is None and garageId is None:
+        for maintenance in maintanence_repo.get_maintenances(db_session):
+            maintenances.append(Maintenance.model_validate(maintenance))
 
     return maintenances
 
@@ -126,3 +140,7 @@ async def update_car(id, data: Annotated[UpdateMaintenance, Body()], db_session:
 @app.delete("/maintenance/{id}")
 async def delete_car(id, db_session: session):
     maintanence_repo.delete_maintenance(id, db_session)
+
+@app.get("/maintenance/monthlyRequestsReport")
+async def get_maintenance_monthlyReport(db_session: session, garageId: int | None = None, startMonth: str | None = None, endMonth: str | None = None):
+    return maintanence_repo.get_maintenance_monthlyReport(garageId, startMonth, endMonth, db_session)

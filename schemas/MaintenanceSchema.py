@@ -18,6 +18,12 @@ class Maintenance(BaseModel):
     garages: Garage
     cars: Car
 
+class MaintenanceMonthlyReport(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    yearMonth: str
+    requests: int
+
 class CreateMaintenance(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import Body, Depends, FastAPI, Form
+from fastapi import Body, Depends, FastAPI, Form, Path
 from pydantic import ValidationError
 from sqlmodel import Session
 from .garage import repo as garage_repo
@@ -40,7 +40,9 @@ session = Annotated[Session, Depends(get_session)]
 ## GARAGES
 
 @app.get("/garages")
-async def garages(db_session: session):
+async def garages(db_session: session, city: str | None = None):
+    if city:
+        return garage_repo.get_garages_by_city(city, db_session)
     return garage_repo.get_garages(db_session)
 
 @app.post("/garages")
@@ -62,15 +64,31 @@ async def root(id, db_session: session):
 ## CARS
 
 @app.get("/cars")
-async def cars(db_session: session):
+async def cars(db_session: session, carMake: str | None = None, fromYear: int | None = None, toYear: int | None = None, garageId: int | None = None):
     garage_repo.seed(db_session)
     cars = []
 
-    for car in car_repo.get_cars(db_session):
-       cars.append(Car.model_validate(car))
+    if carMake:
+        for car in car_repo.get_cars_by_make(carMake, db_session):
+            cars.append(Car.model_validate(car))
+        return cars
+    
+    if fromYear and toYear:
+        for car in car_repo.get_cars_by_year(fromYear, toYear, db_session):
+            cars.append(Car.model_validate(car))
+        return cars
+    
+    if garageId:
+        for car in car_repo.get_cars_by_garage(garageId, db_session):
+            cars.append(Car.model_validate(car))
+        return cars
+    
+    if carMake is None and fromYear is None and toYear is None and garageId is None:
+        for car in car_repo.get_cars(db_session):
+            cars.append(Car.model_validate(car))
 
     return cars
-
+    
 @app.post("/cars")
 async def create_car(data: Annotated[CreateCar, Body()], db_session: session):
     car_repo.create_car(data, db_session)

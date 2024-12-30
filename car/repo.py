@@ -14,6 +14,21 @@ def get_cars(session: Annotated[Session, Depends(get_session)]):
     cars = session.exec(stmt).all()
     return cars
 
+def get_cars_by_make(make: str, session: Annotated[Session, Depends(get_session)]):
+    stmt = select(CarModel).where(CarModel.make == make)
+    cars = session.exec(stmt).all()
+    return cars
+
+def get_cars_by_year(From: int, To: int, session: Annotated[Session, Depends(get_session)]):
+    stmt = select(CarModel).where(CarModel.productionYear >= From, CarModel.productionYear <= To)
+    cars = session.exec(stmt).all()
+    return cars
+
+def get_cars_by_garage(garageId: int, session: Annotated[Session, Depends(get_session)]):
+    stmt = select(CarModel).join(CarGarageLink).where(CarGarageLink.garage_id == garageId)
+    cars = session.exec(stmt).all()
+    return cars
+
 def create_car(data: CreateCar, session: Annotated[Session, Depends(get_session)]):
     add_car = CarModel(make=data.make, model=data.model, licensePlate=data.licensePlate, productionYear=data.productionYear)
     session.add(add_car)

@@ -12,6 +12,11 @@ def get_garages(session: Annotated[Session, Depends(get_session)]):
     garages = session.exec(stmt).all()
     return garages
 
+def get_garages_by_city(city: str, session: Annotated[Session, Depends(get_session)]):
+    stmt = select(GarageModel).where(GarageModel.city == city)
+    garages = session.exec(stmt).all()
+    return garages
+
 def create_garage(data: CreateGarage, session: Annotated[Session, Depends(get_session)]):
     add_garage = GarageModel(name=data.name, location=data.location, city=data.city, capacity=data.capacity)
     session.add(add_garage)

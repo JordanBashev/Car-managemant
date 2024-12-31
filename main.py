@@ -46,6 +46,10 @@ async def garages(db_session: session, city: str | None = None):
         return garage_repo.get_garages_by_city(city, db_session)
     return garage_repo.get_garages(db_session)
 
+@app.get("/garages/dailyAvailabilityReport")
+async def get_garages_report(db_session: session,  startDate: date | None = None, endDate: date | None = None, garageId: int | None = None):
+    return garage_repo.get_garages_report(garageId, startDate, endDate, db_session)
+
 @app.post("/garages")
 async def create_garage(data: Annotated[CreateGarage, Body()], db_session: session):
     garage_repo.create_garage(data, db_session)
@@ -55,12 +59,8 @@ async def update_garage(id, data: Annotated[UpdateGarage, Body()], db_session: s
     garage_repo.update_garage(id, data, db_session)
 
 @app.delete("/garages/{id}")
-async def root(id, db_session: session):
+async def delete_garage(id, db_session: session):
     garage_repo.delete_garage(id, db_session)
-
-# @app.get("/garages")
-# async def root():
-#     print("data")
 
 ## CARS
 

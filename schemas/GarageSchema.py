@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel, ConfigDict
 
+from datetime import date
+
 class Garage(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -20,3 +22,10 @@ class CreateGarage(BaseModel):
 
 class UpdateGarage(CreateGarage):
     pass
+
+class GarageReport(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    date: date
+    requests: int
+    availableCapacity: int
